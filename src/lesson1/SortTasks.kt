@@ -2,6 +2,12 @@
 
 package lesson1
 
+import java.io.File
+import java.lang.reflect.TypeVariable
+import java.util.*
+import kotlin.math.min
+
+
 /**
  * Сортировка времён
  *
@@ -32,10 +38,42 @@ package lesson1
  *
  * В случае обнаружения неверного формата файла бросить любое исключение.
  */
-fun sortTimes(inputName: String, outputName: String) {
-    TODO()
-}
 
+fun sortTimes(inputName: String, outputName: String) {
+    val inpName = File(inputName).readLines()
+    val timeInSecond = mutableListOf<Pair<Int, String>>()
+    for (time in inpName) {
+        val partOfLine = time.split(" ")
+        val partOfTime = partOfLine[0].split(":")
+        if (partOfLine[1] == "PM")
+            if (partOfTime[0].toInt() != 12)
+                timeInSecond.add(
+                    Pair(
+                        ((partOfTime[0].toInt() + 12) * 3600 + partOfTime[1].toInt() * 60 + partOfTime[2].toInt()), time
+                    )
+                )
+            else timeInSecond.add(
+                Pair((partOfTime[0].toInt() * 3600 + partOfTime[1].toInt() * 60 + partOfTime[2].toInt()), time)
+            )
+        else
+            if (partOfTime[0].toInt() != 12)
+                timeInSecond.add(
+                    Pair((partOfTime[0].toInt() * 3600 + partOfTime[1].toInt() * 60 + partOfTime[2].toInt()), time)
+                )
+            else timeInSecond.add(Pair(partOfTime[1].toInt() * 60 + partOfTime[2].toInt(), time))
+    }
+    val sortedTime = timeInSecond.sortedBy { it.first }
+
+    val out = File(outputName).bufferedWriter()
+
+    for (time in sortedTime) {
+        out.write(time.second)
+        out.newLine()
+    }
+    out.close()
+}
+// Средний случай: n + nlogn + n = 2n + nlogn = n + nlogn = nlogn
+// Плохой случай: n + n^2 + n = 2n + n^2 = n + n^2 = n^2
 /**
  * Сортировка адресов
  *
@@ -62,10 +100,78 @@ fun sortTimes(inputName: String, outputName: String) {
  *
  * В случае обнаружения неверного формата файла бросить любое исключение.
  */
-fun sortAddresses(inputName: String, outputName: String) {
-    TODO()
+
+class ContainerOfPeople(var containerWithName: MutableMap<String, MutableList<String>>) {
+    fun containsContainer(lastName: String): Boolean {
+        return (containerWithName.containsKey(lastName))
+    }
+
+    fun addName(lastName: String, name: String) {
+        containerWithName[lastName]!!.add(name)
+    }
+
+    fun addListName(lastName: String, name: String) {
+        containerWithName[lastName] = mutableListOf(name)
+    }
+
+    fun sortContainer(): SortedMap<String, MutableList<String>> {
+        for (listOfNames in containerWithName) {
+            listOfNames.value.sortBy { it }
+        }
+        return containerWithName.toSortedMap()
+    }
 }
 
+// Класс введен для лучшей читаемости сложной структры данных
+
+fun sortAddresses(inputName: String, outputName: String) {
+    val input = File(inputName).readLines()
+
+    val mapOfStreet = mutableMapOf<String, MutableMap<Int, ContainerOfPeople>>()
+    for (i in input) {
+        val streetAndName = i.split(" - ")
+        val streetAndNumber = streetAndName[1].split(" ")
+        val nameAndLastName = streetAndName[0].split(" ")
+        val name = nameAndLastName[1]
+        val lastName = nameAndLastName[0]
+        val street = streetAndNumber[0]
+        val house = streetAndNumber[1].toInt()
+        val containerOfPeople = ContainerOfPeople(mutableMapOf(lastName to mutableListOf(name)))
+
+        if (mapOfStreet.containsKey(street)) { // проверяю наличие улицы в мапе
+            if (mapOfStreet[street]!!.containsKey(house)) { // если улица есть то проверяю наличие дома на данной улице
+                if (mapOfStreet[street]!![house]!!.containsContainer(lastName))
+                // если дом есть проверяю наличие списка имен с некоторой фамилией
+                    mapOfStreet[street]!![house]!!.addName(lastName, name)
+                // если такая фамилия существует то добавляю жильца в список жильцов с одной фамилией
+                else mapOfStreet[street]!![house]!!.addListName(lastName, name)
+                // если фамилии не существует создаю фамилию и присваиваю  список с именем
+            } else mapOfStreet[street]!![house] = containerOfPeople
+            // если дома не существует создаю дом и кладу в него объект класса ContainerOfPeople
+        } else mapOfStreet[street] = mutableMapOf(house to containerOfPeople)
+        // если улицы не существует создаю улицу с домом, в который кладется объект класса ContainerOfPeople
+    }
+
+    val out = File(outputName).bufferedWriter()
+    for (street in mapOfStreet.toSortedMap()) {
+        for (house in street.value.toSortedMap()) {
+            var lineOfName = ""
+            for (i in 0 until house.value.sortContainer().toList().size) {
+                val lastName = house.value.sortContainer().toList()[i]
+                for (name in 0 until lastName.second.size) {
+                    lineOfName += "${lastName.first} ${lastName.second[name]}, "
+                }
+            }
+            out.write("${street.key} ${house.key} - $lineOfName".replace(Regex(""", $"""), ""))
+            out.newLine()
+        }
+    }
+    out.close()
+}
+
+// Средний случай: n^4 + n^2logn + 2nlogn = n^4
+// Плохой случай: n^4 + n^3 + 2n^2 = n^4
+// Не уверен, что правильно посчитал
 /**
  * Сортировка температур
  *
@@ -96,9 +202,36 @@ fun sortAddresses(inputName: String, outputName: String) {
  * 99.5
  * 121.3
  */
+
+
 fun sortTemperatures(inputName: String, outputName: String) {
-    TODO()
+    val input = File(inputName).readLines()
+    val mutList = mutableMapOf<Double, Int>()
+    for (temp in input) {
+        if (mutList.containsKey(temp.toDouble())) {
+            mutList[temp.toDouble()] = mutList[temp.toDouble()]!! + 1
+        } else mutList[temp.toDouble()] = 1
+    }
+
+    val sortedList = mutList.toSortedMap()
+
+    val out = File(outputName).bufferedWriter()
+    for (temp in sortedList) {
+        if (temp.value > 1) {
+            for (i in 0 until temp.value) {
+                out.write(temp.key.toString())
+                out.newLine()
+            }
+        } else {
+            out.write(temp.key.toString())
+            out.newLine()
+        }
+    }
+    out.close()
 }
+
+// Средний случай: n + nlogn + n = nlogn
+// Плохой случай: n + n^2 + n = n^2
 
 /**
  * Сортировка последовательности
@@ -129,10 +262,49 @@ fun sortTemperatures(inputName: String, outputName: String) {
  * 2
  * 2
  */
-fun sortSequence(inputName: String, outputName: String) {
-    TODO()
+
+private fun minPairValue(valueFirst: Pair<Int, Int>, valueSecond: Pair<Int, Int>): Pair<Int, Int> {
+    val min = min(valueFirst.first, valueSecond.first)
+    return if (valueFirst.first == min) valueFirst else valueSecond
 }
 
+fun sortSequence(inputName: String, outputName: String) {
+    val input = File(inputName).readLines()
+    val listOfNumbers = mutableMapOf<Int, Int>()
+    for (line in input) {
+        if (listOfNumbers.contains(line.toInt())) {
+            listOfNumbers[line.toInt()] = listOfNumbers[line.toInt()]!! + 1
+        } else listOfNumbers[line.toInt()] = 1
+    }
+    val sortedListOfNumbers = listOfNumbers.toList().sortedBy { it.second }
+
+    var maxCountOfNumber = sortedListOfNumbers[sortedListOfNumbers.lastIndex]
+
+
+    for (i in sortedListOfNumbers.size - 2 downTo 0) {
+        if (sortedListOfNumbers[i].second == maxCountOfNumber.second) {
+            maxCountOfNumber = minPairValue(maxCountOfNumber, sortedListOfNumbers[i])
+
+        } else break
+    }
+
+    val out = File(outputName).bufferedWriter()
+
+    for (i in 0 until input.size) {
+        if (input[i].toInt() != maxCountOfNumber.first) {
+            out.write(input[i])
+            out.newLine()
+        }
+    }
+
+    for (i in 0 until maxCountOfNumber.second) {
+        out.write(maxCountOfNumber.first.toString())
+        out.newLine()
+    }
+    out.close()
+}
+// Средний случай: n + nlogn + (<n) + n + n = 3n + (<n) + nlogn = n + nlogn = nlogn
+// Плохой случай: n + n^2 + (<n) + n + n = 3n + (<n) + n^2 = n + n^2 = n^2
 /**
  * Соединить два отсортированных массива в один
  *
@@ -150,4 +322,3 @@ fun sortSequence(inputName: String, outputName: String) {
 fun <T : Comparable<T>> mergeArrays(first: Array<T>, second: Array<T?>) {
     TODO()
 }
-

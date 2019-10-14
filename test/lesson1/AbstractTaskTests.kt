@@ -136,7 +136,7 @@ abstract class AbstractTaskTests : AbstractFileTests() {
             testGeneratedTemperatures(it)
         }
 
-        println("sortTemperatures: $perf")
+        println("lesson1.sortTemperatures: $perf")
     }
 
     private fun generateSequence(totalSize: Int, answerSize: Int): PerfResult<Unit> {
@@ -295,7 +295,7 @@ abstract class AbstractTaskTests : AbstractFileTests() {
             testGeneratedSequence(it, it / 20)
         }
 
-        println("sortSequence: $perf")
+        println("lesson1.sortSequence: $perf")
     }
 
     private fun generateArrays(
@@ -342,6 +342,6 @@ abstract class AbstractTaskTests : AbstractFileTests() {
             testGeneratedArrays(it, it)
         }
 
-        println("mergeArrays: $perf")
+        println("lesson1.mergeArrays: $perf")
     }
 }

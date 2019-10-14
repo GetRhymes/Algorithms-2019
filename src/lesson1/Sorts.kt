@@ -19,7 +19,7 @@ fun <T : Comparable<T>> insertionSort(elements: MutableList<T>) {
     }
 }
 
-private fun merge(elements: IntArray, begin: Int, middle: Int, end: Int) {
+fun merge(elements: IntArray, begin: Int, middle: Int, end: Int) {
     val left = elements.copyOfRange(begin, middle)
     val right = elements.copyOfRange(middle, end)
     var li = 0
