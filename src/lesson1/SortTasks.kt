@@ -9,6 +9,7 @@ import kotlin.math.abs
 import kotlin.math.min
 
 
+
 /**
  * Сортировка времён
  *
@@ -75,6 +76,7 @@ fun sortTimes(inputName: String, outputName: String) {
 }
 // Средний случай: n + nlogn + n = 2n + nlogn = n + nlogn = nlogn
 // Плохой случай: n + n^2 + n = 2n + n^2 = n + n^2 = n^2
+// память O(n + 2n) = O(3n) = O(n)
 /**
  * Сортировка адресов
  *
@@ -165,6 +167,7 @@ fun sortAddresses(inputName: String, outputName: String) {
 
 // Средний случай: n + nlogn + nlogn + n = nlogn
 // Плохой случай: n + nlogn + nlogn + n = nlogn
+// память O(n^4)
 // Не уверен, что правильно посчитал
 /**
  * Сортировка температур
@@ -224,6 +227,7 @@ fun sortTemperatures(inputName: String, outputName: String) {
 
 // Средний случай: n
 // Плохой случай: n
+// O(1)
 
 /**
  * Сортировка последовательности
@@ -294,6 +298,7 @@ fun sortSequence(inputName: String, outputName: String) {
 }
 // Средний случай: n + n + n + n = 4n = n
 // Плохой случай: n + n + n + n = 4n = n
+// память O(n)
 /**
  * Соединить два отсортированных массива в один
  *

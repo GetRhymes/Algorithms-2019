@@ -3,7 +3,6 @@
 package lesson2
 
 import java.io.File
-import java.lang.Math.min
 
 
 /**
@@ -47,6 +46,7 @@ fun optimizeBuyAndSell(inputName: String): Pair<Int, Int> {
     }
     return Pair(minIndex + 1, maxIndex + 1)
 }
+
 
 /**
  * Задача Иосифа Флафия.
@@ -116,6 +116,7 @@ fun josephTask(menNumber: Int, choiceInterval: Int): Int {
 }
 // Плохой случай n
 // Средний случай n
+// память O(n) , n == menNumber
 // Решение из Википедии
 
 /**
@@ -130,53 +131,35 @@ fun josephTask(menNumber: Int, choiceInterval: Int): Int {
  * вернуть ту из них, которая встречается раньше в строке first.
  */
 
-private fun index(s1: String, s2: String): Int {
-    var result = 0
-    for (index in 0 until s1.length) {
-        val mutList = s1.toMutableList()
-        mutList.removeAt(index)
-        val k = mutList.joinToString(separator = "")
-        if (!k.contains(s2)) {
-            result = index
-            break
-        }
-    }
-    return result
-}
 
 fun longestCommonSubstring(first: String, second: String): String {
-    val minLength = min(first.length, second.length)
-    val minString = if (minLength == first.length) first else second
-    val maxString = if (minString == first) second else first
-    if (minString == maxString || maxString.endsWith(minString)) return minString
-    var result = ""
-    var indexResult = 0
-    for (i in 0 until minString.length) {
-        if (maxString.contains(minString.substring(i, i))) {
-            if (minString.lastIndex == i) return result
-            var count = i + 1
-            var possibleResult = ""
-            while (maxString.contains(minString.substring(i, count)) && count < minString.length) {
-                possibleResult = minString.substring(i, count)
-                count++
-            } // этим циклом я наполняю подстроку, которая возможно будет являться результатом
+    if (first == second) return first
+    if (first == "" || second == "") return ""
+    val arrayOfMaxSS = Array(first.length + 1) { IntArray(second.length + 1) }
+    var minIndex = 0
+    var maxIndex = 0
+    var maxValue = 0
 
-            if (possibleResult.length > result.length) {
-                result = possibleResult
-                indexResult = index(first, possibleResult)
-                // метод индекс позволяет выполнить условие задачи (* Если имеется несколько самых длинных общих подстрок одной длины,
-                //* вернуть ту из них, которая встречается раньше в строке first.)
+    for (line in 0..first.length) {
+        for (column in 0..second.length) {
+            if (line == 0 || column == 0 || first[line - 1] != second[column - 1])
+                arrayOfMaxSS[line][column] = 0
+            else {
+                arrayOfMaxSS[line][column] = arrayOfMaxSS[line - 1][column - 1] + 1
             }
-
-            if (possibleResult.length == result.length && index(first, possibleResult) < indexResult) {
-                result = possibleResult
+            if (arrayOfMaxSS[line][column] > maxValue) {
+                maxValue = arrayOfMaxSS[line][column]
+                maxIndex = line
+                minIndex = line - maxValue
             }
         }
     }
-    return result
+    return first.substring(minIndex, maxIndex)
 }
-// Плохой n^2
-// средний n^2
+
+// Плохой случай: m * n, где  m == first.length && n == second.length || n == first.length && m == second.length
+// средний случай: m * n
+// О(mn) - память
 /**
  * Число простых чисел в интервале
  * Простая
@@ -211,6 +194,7 @@ fun calcPrimesNumber(limit: Int): Int {
 }
 //Худший случай nloglogn
 //Среднийй случай nloglogn
+// память O(n^2)
 // алгоритм: Решето Эратосфена
 /**
  * Балда
