@@ -31,23 +31,22 @@ import java.io.File
  */
 fun optimizeBuyAndSell(inputName: String): Pair<Int, Int> {
     val input = File(inputName).readLines()
+    var peroid = Pair(0, 0)
     var minIndex = 0
-    var maxIndex = input.size - 1
-    var maxDifference = 0
-    for (i in 1 until input.size - 1) {
-        for (el in i + 1 until input.size) {
-            val difference = input[i].toInt() - input[el].toInt()
-            if (difference < maxDifference) {
-                maxDifference = difference
-                maxIndex = el
-                minIndex = i
-            }
+    for (i in 1 until input.size) {
+        if (input[i].toInt() < input[minIndex].toInt()) {
+            minIndex = i
+        }
+        if (input[peroid.second].toInt() - input[peroid.first].toInt() < input[i].toInt() - input[minIndex].toInt()) {
+            peroid = Pair(minIndex, i)
         }
     }
-    return Pair(minIndex + 1, maxIndex + 1)
+    return Pair(peroid.first + 1, peroid.second + 1)
 }
 
-
+// Худший О(n)
+// Сркдний О(n)
+// память О(1)
 /**
  * Задача Иосифа Флафия.
  * Простая
@@ -116,7 +115,7 @@ fun josephTask(menNumber: Int, choiceInterval: Int): Int {
 }
 // Плохой случай n
 // Средний случай n
-// память O(n) , n == menNumber
+// память O(n)
 // Решение из Википедии
 
 /**
@@ -160,6 +159,7 @@ fun longestCommonSubstring(first: String, second: String): String {
 // Плохой случай: m * n, где  m == first.length && n == second.length || n == first.length && m == second.length
 // средний случай: m * n
 // О(mn) - память
+// алгоритм решения приведен в википедии
 /**
  * Число простых чисел в интервале
  * Простая
@@ -194,7 +194,7 @@ fun calcPrimesNumber(limit: Int): Int {
 }
 //Худший случай nloglogn
 //Среднийй случай nloglogn
-// память O(n^2)
+// память O(n)
 // алгоритм: Решето Эратосфена
 /**
  * Балда

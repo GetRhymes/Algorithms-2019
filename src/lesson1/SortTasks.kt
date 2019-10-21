@@ -3,11 +3,9 @@
 package lesson1
 
 import java.io.File
-import java.lang.reflect.TypeVariable
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.min
-
 
 
 /**
@@ -76,7 +74,7 @@ fun sortTimes(inputName: String, outputName: String) {
 }
 // Средний случай: n + nlogn + n = 2n + nlogn = n + nlogn = nlogn
 // Плохой случай: n + n^2 + n = 2n + n^2 = n + n^2 = n^2
-// память O(n + 2n) = O(3n) = O(n)
+// память O(1 + 2n) = O(n)
 /**
  * Сортировка адресов
  *
