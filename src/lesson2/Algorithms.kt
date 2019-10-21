@@ -2,6 +2,10 @@
 
 package lesson2
 
+import java.io.File
+import java.lang.Math.min
+
+
 /**
  * Получение наибольшей прибыли (она же -- поиск максимального подмассива)
  * Простая
@@ -27,7 +31,21 @@ package lesson2
  * В случае обнаружения неверного формата файла бросить любое исключение.
  */
 fun optimizeBuyAndSell(inputName: String): Pair<Int, Int> {
-    TODO()
+    val input = File(inputName).readLines()
+    var minIndex = 0
+    var maxIndex = input.size - 1
+    var maxDifference = 0
+    for (i in 1 until input.size - 1) {
+        for (el in i + 1 until input.size) {
+            val difference = input[i].toInt() - input[el].toInt()
+            if (difference < maxDifference) {
+                maxDifference = difference
+                maxIndex = el
+                minIndex = i
+            }
+        }
+    }
+    return Pair(minIndex + 1, maxIndex + 1)
 }
 
 /**
@@ -79,9 +97,26 @@ fun optimizeBuyAndSell(inputName: String): Pair<Int, Int> {
  * Общий комментарий: решение из Википедии для этой задачи принимается,
  * но приветствуется попытка решить её самостоятельно.
  */
-fun josephTask(menNumber: Int, choiceInterval: Int): Int {
-    TODO()
+
+fun rek(menNumber: Int, choiceInterval: Int): Int {
+    return if (menNumber == 1) 1
+    else {
+        var currentMenNumber = 2
+        var result = 1
+        while (currentMenNumber <= menNumber) {
+            result = (result + choiceInterval - 1) % currentMenNumber + 1
+            currentMenNumber++
+        }
+        result
+    }
 }
+
+fun josephTask(menNumber: Int, choiceInterval: Int): Int {
+    return rek(menNumber, choiceInterval)
+}
+// Плохой случай n
+// Средний случай n
+// Решение из Википедии
 
 /**
  * Наибольшая общая подстрока.
@@ -94,10 +129,54 @@ fun josephTask(menNumber: Int, choiceInterval: Int): Int {
  * Если имеется несколько самых длинных общих подстрок одной длины,
  * вернуть ту из них, которая встречается раньше в строке first.
  */
-fun longestCommonSubstring(first: String, second: String): String {
-    TODO()
+
+private fun index(s1: String, s2: String): Int {
+    var result = 0
+    for (index in 0 until s1.length) {
+        val mutList = s1.toMutableList()
+        mutList.removeAt(index)
+        val k = mutList.joinToString(separator = "")
+        if (!k.contains(s2)) {
+            result = index
+            break
+        }
+    }
+    return result
 }
 
+fun longestCommonSubstring(first: String, second: String): String {
+    val minLength = min(first.length, second.length)
+    val minString = if (minLength == first.length) first else second
+    val maxString = if (minString == first) second else first
+    if (minString == maxString || maxString.endsWith(minString)) return minString
+    var result = ""
+    var indexResult = 0
+    for (i in 0 until minString.length) {
+        if (maxString.contains(minString.substring(i, i))) {
+            if (minString.lastIndex == i) return result
+            var count = i + 1
+            var possibleResult = ""
+            while (maxString.contains(minString.substring(i, count)) && count < minString.length) {
+                possibleResult = minString.substring(i, count)
+                count++
+            } // этим циклом я наполняю подстроку, которая возможно будет являться результатом
+
+            if (possibleResult.length > result.length) {
+                result = possibleResult
+                indexResult = index(first, possibleResult)
+                // метод индекс позволяет выполнить условие задачи (* Если имеется несколько самых длинных общих подстрок одной длины,
+                //* вернуть ту из них, которая встречается раньше в строке first.)
+            }
+
+            if (possibleResult.length == result.length && index(first, possibleResult) < indexResult) {
+                result = possibleResult
+            }
+        }
+    }
+    return result
+}
+// Плохой n^2
+// средний n^2
 /**
  * Число простых чисел в интервале
  * Простая
@@ -109,9 +188,30 @@ fun longestCommonSubstring(first: String, second: String): String {
  * Единица простым числом не считается.
  */
 fun calcPrimesNumber(limit: Int): Int {
-    TODO()
-}
+    if (limit <= 1) return 0
 
+    val checkList = mutableListOf<Int>()
+    for (i in 0..limit) {
+        checkList.add(1)
+    }
+    var count = checkList.size
+    for (i in 2 until limit) {
+        if (checkList[i] == 1) {
+            var step = 2 * i
+            while (step <= checkList.size - 1) {
+                if (checkList[step] == 1) {
+                    checkList[step] = 0
+                    count--
+                }
+                step += i
+            }
+        } else continue
+    }
+    return count - 2
+}
+//Худший случай nloglogn
+//Среднийй случай nloglogn
+// алгоритм: Решето Эратосфена
 /**
  * Балда
  * Сложная
