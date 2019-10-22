@@ -46,7 +46,7 @@ fun optimizeBuyAndSell(inputName: String): Pair<Int, Int> {
 
 // Худший О(n)
 // Сркдний О(n)
-// память О(1)
+// память О(n)
 /**
  * Задача Иосифа Флафия.
  * Простая
@@ -98,24 +98,24 @@ fun optimizeBuyAndSell(inputName: String): Pair<Int, Int> {
  */
 
 fun rek(menNumber: Int, choiceInterval: Int): Int {
-    return if (menNumber == 1) 1
-    else {
-        var currentMenNumber = 2
-        var result = 1
-        while (currentMenNumber <= menNumber) {
-            result = (result + choiceInterval - 1) % currentMenNumber + 1
-            currentMenNumber++
-        }
-        result
+    var currentMenNumber = 2
+    var result = 1
+    while (currentMenNumber <= menNumber) {
+        result = (result + choiceInterval - 1) % currentMenNumber + 1
+        currentMenNumber++
     }
+    return result
 }
+
+
+
 
 fun josephTask(menNumber: Int, choiceInterval: Int): Int {
     return rek(menNumber, choiceInterval)
 }
 // Плохой случай n
 // Средний случай n
-// память O(n)
+// память O(1)
 // Решение из Википедии
 
 /**
@@ -172,23 +172,19 @@ fun longestCommonSubstring(first: String, second: String): String {
  */
 fun calcPrimesNumber(limit: Int): Int {
     if (limit <= 1) return 0
-
-    val checkList = mutableListOf<Int>()
-    for (i in 0..limit) {
-        checkList.add(1)
-    }
+    val checkList = MutableList(limit + 1) { true }
     var count = checkList.size
     for (i in 2 until limit) {
-        if (checkList[i] == 1) {
+        if (checkList[i]) {
             var step = 2 * i
             while (step <= checkList.size - 1) {
-                if (checkList[step] == 1) {
-                    checkList[step] = 0
+                if (checkList[step]) {
+                    checkList[step] = false
                     count--
                 }
                 step += i
             }
-        } else continue
+        }
     }
     return count - 2
 }
