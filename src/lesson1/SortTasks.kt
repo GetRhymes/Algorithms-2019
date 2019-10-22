@@ -123,6 +123,39 @@ fun sortContainer(dataStore: MutableMap<String, MutableList<String>>): SortedMap
 }
 
 
+
+//class People() {
+//
+//    private val peopleData = mutableMapOf<String, MutableList<String>>()
+//
+//    fun addData(lastName: String, name: String) {
+//        peopleData[lastName] = mutableListOf(name)
+//    }
+//
+//    fun addPeople() {
+//
+//    }
+//
+//}
+//
+//class Address() {
+//
+//    private val streetData = mutableMapOf<String, MutableMap<Int, People>>()
+//
+//    fun addData(people: People, street: String, house: Int) {
+//        if (streetData.containsKey(street)) {
+//            if (streetData[street]!!.getOrPut(house) { people } != people) {
+//
+//            }
+//        }
+//        streetData[street] = mutableMapOf(house to people)
+//    }
+//
+//    fun
+//
+//}
+// Еще не дописал
+
 fun sortAddresses(inputName: String, outputName: String) {
 
     val input = File(inputName).readLines()
@@ -223,9 +256,11 @@ fun sortTemperatures(inputName: String, outputName: String) {
     out.close()
 }
 
-// Средний случай: n
+// Временные затраты : {
+// средний случай: n
 // Плохой случай: n
-// O(1)
+//}
+// Память: { O(1) }
 
 /**
  * Сортировка последовательности
@@ -257,24 +292,25 @@ fun sortTemperatures(inputName: String, outputName: String) {
  * 2
  */
 
-private fun minPairValue(valueFirst: Pair<Int, Int>, valueSecond: Pair<Int, Int>): Pair<Int, Int> {
-    val min = min(valueFirst.first, valueSecond.first)
-    return if (valueFirst.first == min) valueFirst else valueSecond
+private fun minPairValue(valueFirst: Map.Entry<Int, Int>, valueSecond: Map.Entry<Int, Int>): Map.Entry<Int, Int> {
+    val min = min(valueFirst.key, valueSecond.key)
+    return if (valueFirst.key == min) valueFirst else valueSecond
 }
 
 fun sortSequence(inputName: String, outputName: String) {
     val input = File(inputName).readLines()
     val listOfNumbers = mutableMapOf<Int, Int>()
     for (line in input) {
-        if (listOfNumbers.contains(line.toInt())) {
-            listOfNumbers[line.toInt()] = listOfNumbers[line.toInt()]!! + 1
-        } else listOfNumbers[line.toInt()] = 1
+        val lineInt = line.toInt()
+        if (listOfNumbers.contains(lineInt)) {
+            listOfNumbers[lineInt] = listOfNumbers[lineInt]!! + 1
+        } else listOfNumbers[lineInt] = 1
     }
 
-    var maxCountOfNumber = listOfNumbers.toList().maxBy { it.second }
+    var maxCountOfNumber = listOfNumbers.maxBy { it.value }
 
-    for (i in listOfNumbers.toList()) {
-        if (i.second == maxCountOfNumber!!.second) {
+    for (i in listOfNumbers) {
+        if (i.value == maxCountOfNumber!!.value) {
             maxCountOfNumber = minPairValue(maxCountOfNumber, i)
         }
     }
@@ -282,18 +318,18 @@ fun sortSequence(inputName: String, outputName: String) {
     val out = File(outputName).bufferedWriter()
 
     for (i in 0 until input.size) {
-        if (input[i].toInt() != maxCountOfNumber!!.first) {
+        if (input[i].toInt() != maxCountOfNumber!!.key) {
             out.write(input[i])
             out.newLine()
         }
     }
 
-    for (i in 0 until maxCountOfNumber!!.second) {
-        out.write(maxCountOfNumber.first.toString())
+    for (i in 0 until maxCountOfNumber!!.value) {
+        out.write(maxCountOfNumber.key.toString())
         out.newLine()
     }
     out.close()
-}
+}/// ??????????????????????
 // Средний случай: n + n + n + n = 4n = n
 // Плохой случай: n + n + n + n = 4n = n
 // память O(n)
