@@ -1,8 +1,10 @@
 package lesson3
 
+
 import java.util.*
 import kotlin.NoSuchElementException
 import kotlin.math.max
+
 
 // Attention: comparable supported but comparator is not
 class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSortedSet<T> {
@@ -12,11 +14,18 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
     override var size = 0
         private set
 
-    private class Node<T>(val value: T) {
+    private class Node<T>(var value: T) {
 
         var left: Node<T>? = null
 
         var right: Node<T>? = null
+
+        fun minimum(): Node<T> {
+            var result = this
+            while (result.left != null)
+                result = result.left!!
+            return result
+        }
     }
 
     override fun add(element: T): Boolean {
@@ -31,6 +40,8 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
             comparison < 0 -> {
                 assert(closest.left == null)
                 closest.left = newNode
+
+
             }
             else -> {
                 assert(closest.right == null)
@@ -62,10 +73,28 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
      * Удаление элемента в дереве
      * Средняя
      */
-    override fun remove(element: T): Boolean {
-        TODO()
+
+    private fun removeRecursion(root: Node<T>?, element: T): Pair<Node<T>?, Boolean> {
+        var resultTree: Node<T>? = root
+        if (resultTree == null) return Pair(resultTree, false)
+        if (element < resultTree.value) resultTree.left = removeRecursion(resultTree.left!!, element).first
+        else if (element > resultTree.value) resultTree.right = removeRecursion(resultTree.right!!, element).first
+        else if (resultTree.left != null && resultTree.right != null) {
+            resultTree.value = resultTree.right!!.minimum().value
+            resultTree.right = removeRecursion(resultTree.right!!, resultTree.value).first
+        } else if (resultTree.left != null) resultTree = resultTree.left else resultTree = resultTree.right
+        return Pair(resultTree, true)
     }
 
+    override fun remove(element: T): Boolean {
+        size--
+        val result = removeRecursion(this.root, element)
+        root = result.first
+        return result.second
+    }
+
+    // Рекурсивная реализация
+// Время O(h), где h - высота дерева
     override operator fun contains(element: T): Boolean {
         val closest = find(element)
         return closest != null && element.compareTo(closest.value) == 0
@@ -84,13 +113,19 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
     }
 
     inner class BinaryTreeIterator internal constructor() : MutableIterator<T> {
+
+        //private var stack = Stack<Node<T>>()
+
+        private var current: Node<T>? = null
+
+        private var temp: Node<T>? = root?.minimum()
         /**
          * Проверка наличия следующего элемента
          * Средняя
          */
         override fun hasNext(): Boolean {
-            // TODO
-            throw NotImplementedError()
+            return temp != null
+            //return (!stack.isEmpty() || current != null)
         }
 
         /**
@@ -98,17 +133,45 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
          * Средняя
          */
         override fun next(): T {
-            // TODO
-            throw NotImplementedError()
+            //while (current != null) {
+            //    stack.push(current)
+            //    current = current!!.left
+            //}
+            //current = stack.pop()
+            //val node = current
+            //current = current!!.right
+            //return node!!.value                 реализация через стек
+
+            current = temp
+            temp = when {
+                root == null -> null
+                temp == null -> root?.minimum()
+                else -> nextElement(temp!!.value)
+            }
+
+            return current!!.value
+        }
+
+        private fun nextElement(element: T): Node<T>? {
+            var current = root
+            var successor: Node<T>? = null
+            while (current != null) {
+                if (current.value > element) {
+                    successor = current
+                    current = current.left
+                } else current = current.right
+            }
+            return successor
         }
 
         /**
          * Удаление следующего элемента
          * Сложная
          */
+        // время O(h)
         override fun remove() {
-            // TODO
-            throw NotImplementedError()
+            current?.let { remove(it.value) }
+            current = null
         }
     }
 
@@ -128,6 +191,7 @@ class KtBinaryTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSorted
      * Найти множество всех элементов меньше заданного
      * Сложная
      */
+
     override fun headSet(toElement: T): SortedSet<T> {
         TODO()
     }

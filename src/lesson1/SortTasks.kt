@@ -123,44 +123,71 @@ fun sortContainer(dataStore: MutableMap<String, MutableList<String>>): SortedMap
 }
 
 
+class People {
 
-//class People() {
-//
-//    private val peopleData = mutableMapOf<String, MutableList<String>>()
-//
-//    fun addData(lastName: String, name: String) {
-//        peopleData[lastName] = mutableListOf(name)
-//    }
-//
-//    fun addPeople() {
-//
-//    }
-//
-//}
-//
-//class Address() {
-//
-//    private val streetData = mutableMapOf<String, MutableMap<Int, People>>()
-//
-//    fun addData(people: People, street: String, house: Int) {
-//        if (streetData.containsKey(street)) {
-//            if (streetData[street]!!.getOrPut(house) { people } != people) {
-//
-//            }
-//        }
-//        streetData[street] = mutableMapOf(house to people)
-//    }
-//
-//    fun
-//
-//}
-// Еще не дописал
+    private val peopleData = mutableMapOf<String, MutableList<String>>()
+
+
+    fun addData(lastName: String, name: String) {
+        peopleData[lastName] = mutableListOf(name)
+    }
+
+    fun data() = peopleData
+
+    fun addPeople(lastName: String, name: String) {
+        if (peopleData.containsKey(lastName)) {
+            println(true)
+            peopleData[lastName]!!.add(name)
+        } else {
+            println(false)
+            peopleData[lastName] = mutableListOf(name)
+        }
+    }
+
+    fun sortedDataOfPeople(): SortedMap<String, MutableList<String>> {
+        peopleData.forEach { it.value.sortBy { it } }
+        return peopleData.toSortedMap()
+    }
+
+}
+
+class Address {
+
+    private val streetData = mutableMapOf<String, MutableMap<Int, People>>()
+
+    fun addData(people: People, street: String, house: Int, lastName: String, name: String) {
+        if (streetData.containsKey(street)) {
+            println(true)
+            if (streetData[street]!!.containsKey(house)) {
+                println(true)
+                people.addPeople(lastName, name)
+            } else {
+                println(false)
+                streetData[street]!![house] = people.also { it.addData(lastName, name) }
+            }
+        } else {
+            println(false)
+            streetData[street] = mutableMapOf(house to people)
+        }
+    }
+
+    fun sortedBlock(): MutableMap<String, MutableMap<Int, People>> {
+        val sortedData = mutableMapOf<String, MutableMap<Int, People>>()
+        streetData.toSortedMap().forEach {
+            it.value.toSortedMap()
+            sortedData[it.key] = it.value
+        }
+        return sortedData
+    }
+
+}
 
 fun sortAddresses(inputName: String, outputName: String) {
 
     val input = File(inputName).readLines()
+    val address = Address()
+    //val mapOfStreet = mutableMapOf<String, MutableMap<Int, MutableMap<String, MutableList<String>>>>()
 
-    val mapOfStreet = mutableMapOf<String, MutableMap<Int, MutableMap<String, MutableList<String>>>>()
     for (i in input) {
         val streetAndName = i.split(" - ")
         val streetAndNumber = streetAndName[1].split(" ")
@@ -169,31 +196,54 @@ fun sortAddresses(inputName: String, outputName: String) {
         val lastName = nameAndLastName[0]
         val street = streetAndNumber[0]
         val house = streetAndNumber[1].toInt()
-        val peopleData = PeopleData()
-        val containerOfPeople = PeopleData().addData(lastName, name)
+        val peopleData = PeopleData().also {
+            it.addData(lastName, name)
+        }
+        //val containerOfPeople = PeopleData().addData(lastName, name)
 
-        if (mapOfStreet.containsKey(street)) {
-            if (mapOfStreet[street]!!.getOrPut(house) { containerOfPeople } != containerOfPeople)
-                peopleData.addName(lastName, name, mapOfStreet[street]!![house]!!)
-        } else mapOfStreet[street] = mutableMapOf(house to containerOfPeople)
+        val people = People().also {
+            it.addData(lastName, name)
+        }
+        // if (mapOfStreet.containsKey(street)) {
+        //     if (mapOfStreet[street]!!.getOrPut(house) { containerOfPeople } != containerOfPeople)
+        //         peopleData.addName(lastName, name, mapOfStreet[street]!![house]!!)
+        // } else mapOfStreet[street] = mutableMapOf(house to containerOfPeople)
+
+        address.addData(people, street, house, lastName, name)
     }
 
-    val out = File(outputName).bufferedWriter()
-    for (street in mapOfStreet.toSortedMap()) {
-        for (house in street.value.toSortedMap()) {
+    val output = File(outputName).bufferedWriter()
+    for (data in address.sortedBlock()) {
+        for (house in data.value) {
             var lineOfName = ""
-            val sortedHouseList = sortContainer(house.value).toList()
-            for (i in 0 until sortedHouseList.size) {
-                val lastName = sortedHouseList[i]
-                for (name in 0 until lastName.second.size) {
-                    lineOfName += "${lastName.first} ${lastName.second[name]}, "
+            for (lastName in house.value.sortedDataOfPeople()) {
+                for (name in 0 until lastName.value.size) {
+                    println("${data.key}  ${house.key} ${lastName.key} ${lastName.value}")
+                    lineOfName += "${lastName.key} ${lastName.value[name]}, "
                 }
+                output.write("${data.key} ${house.key} - $lineOfName".replace(Regex(""", $"""), ""))
+                output.newLine()
             }
-            out.write("${street.key} ${house.key} - $lineOfName".replace(Regex(""", $"""), ""))
-            out.newLine()
         }
     }
-    out.close()
+    output.close()
+
+    //val out = File(outputName).bufferedWriter()
+    //for (street in ) {
+    //    for (house in street.value.toSortedMap()) {
+    //        var lineOfName = ""
+    //        val sortedHouseList = sortContainer(house.value).toList()
+    //        for (i in 0 until sortedHouseList.size) {
+    //            val lastName = sortedHouseList[i]
+    //            for (name in 0 until lastName.second.size) {
+    //                lineOfName += "${lastName.first} ${lastName.second[name]}, "
+    //            }
+    //        }
+    //        out.write("${street.key} ${house.key} - $lineOfName".replace(Regex(""", $"""), ""))
+    //        out.newLine()
+    //    }
+    //}
+    //out.close()
 }
 
 // Средний случай: n + nlogn + nlogn + n = nlogn
