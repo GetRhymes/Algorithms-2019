@@ -9,6 +9,8 @@ class OpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T>(
 
     private val storage = Array<Any?>(capacity) { null }
 
+    private val helpBox = Array(capacity) { false }
+
     override var size: Int = 0
 
     private fun T.startingIndex(): Int {
@@ -18,12 +20,15 @@ class OpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T>(
     override fun contains(element: T): Boolean {
         var index = element.startingIndex()
         var current = storage[index]
-        while (current != null) {
+        var checked = 0
+
+        while (helpBox[index] && checked < capacity) {
             if (current == element) {
                 return true
             }
             index = (index + 1) % capacity
             current = storage[index]
+            checked += 1
         }
         return false
     }
@@ -41,6 +46,7 @@ class OpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T>(
             current = storage[index]
         }
         storage[index] = element
+        helpBox[index] = true
         size++
         return true
     }
@@ -49,13 +55,57 @@ class OpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T>(
      * Для этой задачи пока нет тестов, но вы можете попробовать привести решение и добавить к нему тесты
      */
     override fun remove(element: T): Boolean {
-        TODO("not implemented")
+        val startingIndex = element.startingIndex()
+        println("$startingIndex      startIndex")
+        var index = startingIndex
+        var current = storage[index]
+        println("$current      current")
+        println("$capacity       capacity")
+        while (helpBox[index]) {
+            if (current == element) {
+                storage[index] = null
+                size -= 1
+                return true
+            }
+
+            index = (index + 1) % capacity
+            println(index)
+            if (index == startingIndex) {
+                return false
+            }
+            current = storage[index]
+        }
+        return false
     }
 
     /**
      * Для этой задачи пока нет тестов, но вы можете попробовать привести решение и добавить к нему тесты
      */
-    override fun iterator(): MutableIterator<T> {
-        TODO("not implemented")
+    override fun iterator() = object : MutableIterator<T> {
+
+        private var currentIndex = 0
+        private var nextIndex = 0
+        private var current: T? = null
+
+        override fun hasNext(): Boolean {
+            while (nextIndex < capacity && storage[nextIndex] == null) nextIndex++
+            return nextIndex < capacity
+        }
+
+        override fun next(): T {
+            currentIndex = nextIndex
+            current = storage[nextIndex]!! as T
+            println(current)
+            nextIndex++
+            while (nextIndex < capacity && storage[nextIndex] == null) nextIndex++
+            return current!!
+        }
+
+        override fun remove() {
+            if (current != null) {
+                storage[currentIndex] = null
+                size -= 1
+            }
+        }
     }
 }
