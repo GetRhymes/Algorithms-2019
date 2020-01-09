@@ -3,6 +3,8 @@ package lesson4
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 
 class OpenAddressingSetTest {
 
@@ -84,6 +86,27 @@ class OpenAddressingSetTest {
         assertFalse(set.contains("Gamma"))
         set.add("Alpha")
         assertEquals(1, set.size)
+    }
+
+    @Test
+    @Tag("Example")
+    fun maxCapacity() {
+
+        var set = OpenAddressingSet<String>(3)
+
+        for (i in 1..8) {
+            set.add("$i")
+        }
+        assertEquals(8, set.size)
+        assertThrows<IllegalStateException> { set.add("more") }
+
+        set = OpenAddressingSet<String>(4)
+
+        for (i in 1..16) {
+            set.add("$i")
+        }
+        assertEquals(16, set.size)
+        assertThrows<IllegalStateException> { set.add("more") }
     }
 
     @Test
