@@ -61,7 +61,7 @@ class OpenAddressingSetTest {
     @Test
     @Tag("Example")
     fun iterator() {
-        val set = OpenAddressingSet<String>(5)
+        val set = OpenAddressingSet<String>(16)
         assertTrue(set.isEmpty())
         set.add("Alpha")
         set.add("Beta")
