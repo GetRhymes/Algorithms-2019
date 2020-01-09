@@ -61,22 +61,29 @@ class OpenAddressingSetTest {
     @Test
     @Tag("Example")
     fun iterator() {
-        val kit = setOf("Alpha", "Beta", "Omega", "Gamma")
-        val set = OpenAddressingSet<String>(16)
+        val set = OpenAddressingSet<String>(5)
         assertTrue(set.isEmpty())
-        for (i in kit) {
-            set.add(i)
-            assertTrue(i in set)
-        }
-
+        set.add("Alpha")
+        set.add("Beta")
+        set.add("Omega")
+        set.add("Delta")
+        set.add("Gamma")
+        assertEquals(setOf("Alpha", "Beta", "Omega", "Delta", "Gamma"), set)
         val iterator = set.iterator()
-        var count = kit.size
 
-        while (iterator.hasNext()) {
-            assertTrue(iterator.next() in kit)
-            count -= 1
+        for (i in set.size - 1 downTo 0) {
+            iterator.next()
+            iterator.remove()
+            assertEquals(i, set.size)
         }
-        assertSame(0, count)
+        assertFalse(iterator.hasNext())
+        assertFalse(set.contains("Alpha"))
+        assertFalse(set.contains("Beta"))
+        assertFalse(set.contains("Omega"))
+        assertFalse(set.contains("Delta"))
+        assertFalse(set.contains("Gamma"))
+        set.add("Alpha")
+        assertEquals(1, set.size)
     }
 
     @Test
@@ -91,17 +98,13 @@ class OpenAddressingSetTest {
         }
 
         var toRemove = "Beta"
-
         var iterator = set.iterator()
         var count = kit.size
 
         while (iterator.hasNext()) {
             val next = iterator.next()
-            println(next)
-
             assertTrue(next in kit)
             count -= 1
-
             if (next == toRemove) {
                 iterator.remove()
             }
@@ -122,10 +125,8 @@ class OpenAddressingSetTest {
 
         while (iterator.hasNext()) {
             val next = iterator.next()
-            println(next)
             assertTrue(next in kit)
             count -= 1
-
             if (next == toRemove) {
                 iterator.remove()
             }

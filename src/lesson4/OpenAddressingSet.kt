@@ -9,7 +9,7 @@ class OpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T>(
 
     private val storage = Array<Any?>(capacity) { null }
 
-    private val helpBox = Array(capacity) { false }
+    private val storageUsed = Array(capacity) { false }
 
     override var size: Int = 0
 
@@ -22,13 +22,11 @@ class OpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T>(
         var current = storage[index]
         var checked = 0
 
-        while (helpBox[index] && checked < capacity) {
-            if (current == element) {
-                return true
-            }
+        while (storageUsed[index] && checked < capacity) {
+            if (current == element) return true
             index = (index + 1) % capacity
             current = storage[index]
-            checked += 1
+            checked++
         }
         return false
     }
@@ -46,30 +44,31 @@ class OpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T>(
             current = storage[index]
         }
         storage[index] = element
-        helpBox[index] = true
+        storageUsed[index] = true
         size++
         return true
     }
 
     /**
      * Для этой задачи пока нет тестов, но вы можете попробовать привести решение и добавить к нему тесты
+     *
+     *
+     * Time : O(n), где n == capacity
+     * Memory : O(1)
      */
     override fun remove(element: T): Boolean {
         val startingIndex = element.startingIndex()
-        println("$startingIndex      startIndex")
         var index = startingIndex
         var current = storage[index]
-        println("$current      current")
-        println("$capacity       capacity")
-        while (helpBox[index]) {
+
+        while (storageUsed[index]) {
             if (current == element) {
                 storage[index] = null
-                size -= 1
+                size--
                 return true
             }
 
             index = (index + 1) % capacity
-            println(index)
             if (index == startingIndex) {
                 return false
             }
@@ -87,24 +86,33 @@ class OpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T>(
         private var nextIndex = 0
         private var current: T? = null
 
-        override fun hasNext(): Boolean {
+        init {
             while (nextIndex < capacity && storage[nextIndex] == null) nextIndex++
+        }
+
+        // Time : O(1)
+        // Memory : O(1)
+        override fun hasNext(): Boolean {
             return nextIndex < capacity
         }
 
+        // Time : O(n), где  n == capacity
+        // Memory : O(1)
         override fun next(): T {
             currentIndex = nextIndex
             current = storage[nextIndex]!! as T
-            println(current)
             nextIndex++
             while (nextIndex < capacity && storage[nextIndex] == null) nextIndex++
             return current!!
         }
 
+
+        // Time : O(1)
+        // Memory : O(1)
         override fun remove() {
             if (current != null) {
                 storage[currentIndex] = null
-                size -= 1
+                size--
             }
         }
     }
